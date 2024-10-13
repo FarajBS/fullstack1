@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import Arti from "./articleSchema.js";
+import Article from "./models/articleSchema.js";
 
 dotenv.config();
 
@@ -22,7 +22,7 @@ async function main() {
 // Get //
 // All //
 app.get("/articles", (req, res) => {
-  Arti.find().then((result) => {
+  Article.find().then((result) => {
     res.send(result);
   });
 });
@@ -32,7 +32,7 @@ app.get("/articles", (req, res) => {
 
 // One
 app.get("/articles/:id", (req, res) => {
-  Arti.findOne().then((result) => {
+  Article.findOne().then((result) => {
     res.send(result);
   });
 });
@@ -45,25 +45,28 @@ app.get("/articles/:id", (req, res) => {
 
 // Post //
 app.post("/articles", (req, res) => {
-  const article = new Arti({
+  const article = new Article({
     name: req.body.name,
     author: req.body.author,
-    printNum: req.body.printNum,
-    datePublish: req.body.datePublish,
-    pdf: req.body.pdf,
+    edition: req.body.edition,
+    publication: req.body.publication,
+    isElectronic: req.body.isElectronic,
     price: req.body.price,
-    language: req.body.language,
-    class: req.body.class,
+    languages: req.body.languages,
+    category: req.body.category
   });
 
   article.save()
     .then((result) => {
-      res.send(result);
+      res.status(201).send(result); // إرسال استجابة 201 عند النجاح
     })
     .catch((error) => {
       console.error(error);
+      res.status(500).send({ message: "حدث خطأ أثناء حفظ المقالة." }); // إرسال استجابة 500 عند الخطأ
     });
 });
+
+
 //=== Post ===//
 
 // =========================================================================================================================================== //
@@ -73,7 +76,7 @@ app.post("/articles", (req, res) => {
 // Update //
 app.patch("/articles/:id", (req, res) => {
   const { id } = req.params;
-  Arti.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }).then(
+  Article.findByIdAndUpdate(id, req.body, { new: true, runValidators: true }).then(
     (result) => {
       res.send(result);
     }
@@ -89,7 +92,7 @@ app.patch("/articles/:id", (req, res) => {
 app.delete("/articles/:id", (req, res) => {
   const { id } = req.params;
 
-  Arti.deleteOne({ _id: id })
+  Article.deleteOne({ _id: id })
     .then((result) => {
       if (result.deletedCount === 0) {
         return res.send("Sorry, Not Found");
